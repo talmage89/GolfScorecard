@@ -1,0 +1,42 @@
+body {
+    background-color: rgb(90, 128, 92);
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+}
+.main {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    overflow: scroll;
+
+    display: flex;
+    justify-content: center;
+}
+.course-select-container {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.title {
+    width: 100%;
+    padding: 50px 0px;
+    text-align: center;
+    background-color: rgb(184, 200, 184);
+
+}
+.courses {
+    padding: 50px 0px;
+    background-color: rgba(0, 0, 0, 0);
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+}
+.card{margin: 5px;}
+.card > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
