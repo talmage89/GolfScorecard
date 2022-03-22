@@ -3,7 +3,8 @@ body {
     width: 100%;
 
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 .main {
     width: 100%;
@@ -11,7 +12,8 @@ body {
     overflow: scroll;
 
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+
 }
 .course-select-container {
     width: 100%;
@@ -34,9 +36,63 @@ body {
     display: flex;
     justify-content: space-between;
 }
-.card{margin: 5px;}
+.card{
+    margin: 5px;
+    height: 350px;
+}
 .card > div {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+#course-is-selected{
+    display:none;
+}
+.selected-course{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.table-responsive-lg{
+    width: 95%;
+    background-color: white;
+    font-size: 12px;
+    margin: 50px 0px;
+}
+.playerOptions{
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+.playerNameInputs{
+    display: none;
+}
+.btn{
+    margin: 20px 5px;
+    max-width: 150px;
+}
+.playerNameInputs{
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+/* tr td:nth-child(2n) {
+    background-color: rgb(245, 246, 255);
+} */
+#render-buttons{
+    display: none;
+}
+colgroup col:nth-child(2n){
+    background-color: rgb(239, 244, 255);
+}
+.table-remove-border {
+    border: none;
+}
+.table-remove-border>:not(:first-child){
+    border-top: none;
+}
+td {
+    border: none;
 }
