@@ -13,7 +13,7 @@ body {
 
     display: flex;
     flex-direction: column;
-
+    align-items: center;
 }
 .course-select-container {
     width: 100%;
@@ -55,6 +55,13 @@ body {
     flex-direction: column;
     align-items: center;
 }
+.selected-course-title{
+    width: 100%;
+    padding: 50px 0px;
+    text-align: center;
+    background-color: rgb(74, 87, 78);
+    color: white;
+}
 .table-responsive-lg{
     width: 95%;
     background-color: white;
@@ -95,4 +102,8 @@ colgroup col:nth-child(2n){
 }
 td {
     border: none;
+}
+.btn-secondary{
+    background-color: whitesmoke;
+    color: black;
 }

@@ -61,6 +61,7 @@ async function renderCourseInfo(id, league, playerArr) {
 
     document.getElementById('select-a-course').style.display = 'none';
     document.getElementById('course-is-selected').style.display = 'flex';
+    document.getElementById('scorecard-title').innerText = response.data.name;
     for (let i = 0; i < 23; i ++) {html += '<col></col>'}
     for (let i = 0; i < 21; i ++) {
         if (i == 0) {html += '<td>Hole</td>'} 
@@ -115,7 +116,7 @@ async function renderCourseInfo(id, league, playerArr) {
         for (let i = 0; i < 21; i ++) {
             if (i == 0) {html += `<td class="player-name-input" id="player${p}" contentEditable="true">${playerArr[p].name}</td>`;} 
             else if (i == 10) {html += `<td id="p${p}scoreOut">${pScoreOut}</td>`}
-            else if (i == 20) {html += `<td id="p${p}scoreIn">${pScoreIn}</td><td id="p${p}totScore"></td></tr>`;} 
+            else if (i == 20) {html += `<td id="p${p}scoreIn">${pScoreIn}</td><td id="p${p}totScore">${pScoreIn + pScoreOut}</td></tr>`;} 
             else if (playerArr[p].hasOwnProperty(i)){ 
                 html += `<td class="player-score-input" id="p${p}i${i}" contentEditable="true">${playerArr[p][i]}</td>`;
                 if (i < 10) {
@@ -145,8 +146,8 @@ async function renderCourseInfo(id, league, playerArr) {
     document.getElementById('builder-container').innerHTML = html;
     document.getElementById('render-buttons').style.display = 'inline-block';
     document.getElementById('render-buttons').innerHTML = 
-    `<button class="btn btn-primary return-to-selection" id="return-${id}">Change course</button>
-    <button class="btn btn-primary show-new-player-input" id="show-input-${id}">Add a player</button>`
+    `<button class="btn btn-primary btn-secondary return-to-selection" id="return-${id}">Change course</button>
+    <button class="btn btn-primary btn-secondary show-new-player-input" id="show-input-${id}">Add a player</button>`
 }
 function updateScore(player) {
     let gTotal = 0;
@@ -278,8 +279,11 @@ document.body.addEventListener('click', async (e) => {
 
             if (regex.test(input.innerText)) {
                 playerInfo[player][hole] = input.innerText;
-                updateScore(player, hole);
-            } else {input.innerText = '';}
+                updateScore(player);
+            } else {
+                input.innerText = '';
+                updateScore(player);
+            }
         })
     }
     if (e.target.className == 'player-name-input') {
