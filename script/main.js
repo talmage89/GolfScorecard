@@ -1,4 +1,3 @@
-
 function getCourses() {
     return fetch('https://golf-courses-api.herokuapp.com/courses').then(
         function(response) {
@@ -6,7 +5,6 @@ function getCourses() {
         }
     )
 }
-
 function getSpecificCourse(id) {
     return fetch(`https://golf-courses-api.herokuapp.com/courses/${id}`).then(
         function(response) {
@@ -14,8 +12,10 @@ function getSpecificCourse(id) {
         }
     )
 }
-
 async function renderCourses() {
+    document.getElementById('select-a-course').style.display = 'flex';
+    document.getElementById('course-is-selected').style.display = 'none';
+    document.getElementById('render-buttons').style.display = 'none';
     let response = await getCourses();
     let html = '';
     response.courses.forEach(course => {
@@ -53,17 +53,18 @@ async function renderCourses() {
     });
     document.getElementById('course-select').innerHTML = html;
 }
-
-async function renderCourseInfo(id, league, playersArr) {
+async function renderCourseInfo(id, league, playerArr) {
     let response = await getSpecificCourse(id);
     let holes = response.data.holes;
     let html = '<tr>';
     let holeNum = 0;
-    
+
+    document.getElementById('select-a-course').style.display = 'none';
+    document.getElementById('course-is-selected').style.display = 'flex';
     for (let i = 0; i < 23; i ++) {html += '<col></col>'}
     for (let i = 0; i < 21; i ++) {
         if (i == 0) {html += '<td>Hole</td>'} 
-        else if (i == 10) {html += `<td>Out</td><td rowspan="${4 + playersArr.length}">Initials</td>`;} 
+        else if (i == 10) {html += `<td>Out</td><td rowspan="${4 + playerArr.length}">Initials</td>`;} 
         else if (i == 20){html += '<td>In</td><td>Total</td></tr>'}
         else {
             html += `<td>${holes[holeNum].hole}</td>`
@@ -75,13 +76,56 @@ async function renderCourseInfo(id, league, playersArr) {
     let outYards = 0;
     let inYards = 0;
     for (let i = 0; i < 21; i ++) {
-        if (i == 0) {html += '<td>Yard</td>'} 
+        if (i == 0) {
+            switch(parseInt(league)) {
+                case 0:
+                    html += '<td>Champion</td>';
+                    break;
+                case 1:
+                    html += '<td>Mens</td>'
+                    break;
+                case 2:
+                    html += '<td>Womens</td>'
+                    break;
+            }
+        } 
         else if (i == 10) {html += `<td>${outYards}</td>`;} 
-        else if (i == 20){html += `<td>${inYards}</td><td>${outYards + inYards}</td></tr>`}
+        else if (i == 20){html += `<td>${inYards}</td><td>${outYards + inYards}</td></tr>`;}
         else {
             html += `<td>${holes[holeNum].teeBoxes[league].yards}</td>`
             i < 10 ? outYards += holes[holeNum].teeBoxes[league].yards : inYards += holes[holeNum].teeBoxes[league].yards;
             holeNum += 1;
+        }
+    }
+    html += '<tr>'
+    holeNum = 0;
+    for (let i = 0; i < 21; i ++) {
+        if (i == 0) {html += '<td>Handicap</td>'} 
+        else if (i == 10) {html += '<td></td>';} 
+        else if (i == 20){html += '<td></td><td></td></tr>'}
+        else {
+            html += `<td>${holes[holeNum].teeBoxes[league].hcp}</td>`
+            holeNum += 1;
+        }
+    }
+    for (let p = 0; p < playerArr.length; p ++) {
+        let pScoreOut = 0;
+        let pScoreIn = 0;
+        html += '<tr>'
+        for (let i = 0; i < 21; i ++) {
+            if (i == 0) {html += `<td class="player-name-input" id="player${p}" contentEditable="true">${playerArr[p].name}</td>`;} 
+            else if (i == 10) {html += `<td id="p${p}scoreOut">${pScoreOut}</td>`}
+            else if (i == 20) {html += `<td id="p${p}scoreIn">${pScoreIn}</td><td id="p${p}totScore"></td></tr>`;} 
+            else if (playerArr[p].hasOwnProperty(i)){ 
+                html += `<td class="player-score-input" id="p${p}i${i}" contentEditable="true">${playerArr[p][i]}</td>`;
+                if (i < 10) {
+                    pScoreOut += parseInt(playerArr[p][i]);
+                }  else {
+                    pScoreIn += parseInt(playerArr[p][i]); 
+                }
+            } else {
+                html += `<td class="player-score-input" id="p${p}i${i}" contentEditable="true"></td>`;
+            }
         }
     }
     html += '<tr>'
@@ -98,43 +142,47 @@ async function renderCourseInfo(id, league, playersArr) {
             holeNum += 1;
         }
     }
-    html += '<tr>'
-    holeNum = 0;
-    for (let i = 0; i < 21; i ++) {
-        if (i == 0) {html += '<td>Handicap</td>'} 
-        else if (i == 10) {html += '<td></td>';} 
-        else if (i == 20){html += '<td></td><td></td></tr>'}
-        else {
-            html += `<td>${holes[holeNum].teeBoxes[league].hcp}</td>`
-            holeNum += 1;
-        }
-    }
-    for (let p = 0; p < playersArr.length; p ++) {
-        html += '<tr>'
-        for (let i = 0; i < 21; i ++) {
-            if (i == 0) {html += `<td id="player${p}">${playersArr[p]}</td>`;} 
-            else if (i == 10) {html += `<td></td>`}
-            else if (i == 20) {html += `<td></td><td></td></tr>`;} 
-            else { html += `<td></td>`;}
-        }
-    }
-
     document.getElementById('builder-container').innerHTML = html;
     document.getElementById('render-buttons').style.display = 'inline-block';
     document.getElementById('render-buttons').innerHTML = 
-                                                            `<button class="btn btn-primary return-to-selection" id="return-${id}">Change course</button>
-                                                            <button class="btn btn-primary show-new-player-input" id="show-input-${id}">Add a player</button>`
+    `<button class="btn btn-primary return-to-selection" id="return-${id}">Change course</button>
+    <button class="btn btn-primary show-new-player-input" id="show-input-${id}">Add a player</button>`
+}
+function updateScore(player) {
+    let gTotal = 0;
+    let outTotal = 0;
+    let inTotal = 0;
+    for (let i = 1; i < 20; i ++) {
+        if (i < 10) {
+            let tBox = document.getElementById(`p${player}i${i}`)
+            if (tBox.innerText != '') {
+                let val = parseInt(tBox.innerText);
+                outTotal += val;
+                gTotal += val;
+            }
+        } else if (i < 20 && i > 10) {
+            let tBox = document.getElementById(`p${player}i${i}`)
+            if (tBox.innerText != '') {
+                let val = parseInt(tBox.innerText);
+                inTotal += val;
+                gTotal += val;
+            }
+        }
+        document.getElementById(`p${player}scoreOut`).innerText = outTotal;
+        document.getElementById(`p${player}scoreIn`).innerText = inTotal;
+        document.getElementById(`p${player}totScore`).innerText = gTotal;
+    }
 }
 
 renderCourses();
-
+let currentId;
 let optionsBool = [{id: 18300, options: false}, {id: 11819, options: false}, {id: 19002, options: false}];
 let league = 0;
 let players = 1;
-let playerNames = [];
+let playerInfo = [];
 document.body.addEventListener('click', async (e) => {
     if (e.target.className.includes('btn btn-primary')) {
-        let currentId = /\d{5}/.exec(e.target.id)[0];
+        currentId = /\d{5}/.exec(e.target.id)[0];
         if (e.target.id.includes('showOptions')) {
             for (let i = 0; i < 3; i ++) {
                 if (optionsBool[i].id == currentId) {
@@ -181,35 +229,69 @@ document.body.addEventListener('click', async (e) => {
             for (let i = 0; i < players; i ++) {
                 let name = document.getElementById(`input-${i}`).value;
                 if (name != '') {
-                    playerNames.push(name);
+                    playerInfo.push({name});
                 } else {
-                    playerNames.push('&nbsp');
+                    playerInfo.push({name: '&nbsp'});
                 }
             }
-            document.getElementById('select-a-course').style.display = 'none';
-            document.getElementById('course-is-selected').style.display = 'flex';
-            renderCourseInfo(currentId, league, playerNames);
+            renderCourseInfo(currentId, league, playerInfo);
         }
         if (e.target.className.includes('options-back')) {
             document.getElementById(`options${currentId}`).style.display = 'flex';
             document.getElementById(`names-${currentId}`).style.display = 'none';
         }
         if (e.target.className.includes('show-new-player-input')) {
-            playerNames.push('&nbsp');
-            await renderCourseInfo(currentId, league, playerNames);
-            let name = document.getElementById(`player${playerNames.length - 1}`);
+            playerInfo.push({name: '&nbsp'});
+            await renderCourseInfo(currentId, league, playerInfo);
+            let name = document.getElementById(`player${playerInfo.length - 1}`);
             name.contentEditable = 'true';
             name.focus();
             name.addEventListener('blur', () => {
                 if (name.innerText.charCodeAt(0) == 160) {
-                    playerNames.pop();
-                    renderCourseInfo(currentId, league, playerNames);
+                    playerInfo.pop();
+                    renderCourseInfo(currentId, league, playerInfo);
                 } else {
                     name.contentEditable = 'false';
-                    playerNames[playerNames.length - 1] = name.innerText;
-                    renderCourseInfo(currentId, league, playerNames);
+                    playerInfo[playerInfo.length - 1] = {name: name.innerText};
+                    renderCourseInfo(currentId, league, playerInfo);
+                }
+            })
+            name.addEventListener('keydown', (e) => {
+                if (e.code === "Enter") {
+                    name.blur();
                 }
             })
         }
+        if (e.target.className.includes('return-to-selection')) {
+            renderCourses();
+            players = 1;
+            playerInfo = [];
+            league = 0;
+        }
+    }
+    if (e.target.className == 'player-score-input') {
+        let input = document.getElementById(e.target.id);
+        input.addEventListener('blur', () => {
+            let regex = /^\d+$/;
+            let player = e.target.id.replace(/^[a-z](\d)[a-z](\d+)/i, "$1");
+            let hole = e.target.id.replace(/^[a-z](\d)[a-z](\d+)/i, "$2");
+
+            if (regex.test(input.innerText)) {
+                playerInfo[player][hole] = input.innerText;
+                updateScore(player, hole);
+            } else {input.innerText = '';}
+        })
+    }
+    if (e.target.className == 'player-name-input') {
+        let nameToChange = document.getElementById(e.target.id);
+        nameToChange.addEventListener('blur', (e) => {
+            let id = e.target.id.match(/\d$/);
+            playerInfo[id].name = nameToChange.innerText;
+        });
+        nameToChange.addEventListener('keydown', e => {
+            if (e.code == "Enter") {
+                nameToChange.blur();
+            }
+        });
     }
 });
