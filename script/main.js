@@ -149,7 +149,7 @@ async function renderCourseInfo(id, league, playerArr) {
     document.getElementById('builder-container').innerHTML = html;
     document.getElementById('render-buttons').style.display = 'inline-block';
     document.getElementById('render-buttons').innerHTML = 
-    `<button class="btn btn-primary btn-secondary return-to-selection" id="return-${id}">Change course</button>
+    `<button class="btn btn-primary btn-secondary return-to-selection" id="return-${id}">Return to menu</button>
     <button class="btn btn-primary btn-secondary show-new-player-input" id="show-input-${id}">Add a player</button>
     <button class="btn btn-primary btn-secondary clear-scores" id="clear-scores-${id}">Clear scores</button>`
 }
@@ -289,6 +289,7 @@ document.body.addEventListener('click', async (e) => {
             players = 1;
             playerInfo = [];
             league = 0;
+            localStorage.clear();
         }
         if (e.target.className.includes('clear-scores')) {
             localStorage.clear();
