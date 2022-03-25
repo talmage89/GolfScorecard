@@ -62,6 +62,9 @@ async function renderCourseInfo(id, league, playerArr) {
     document.getElementById('select-a-course').style.display = 'none';
     document.getElementById('course-is-selected').style.display = 'flex';
     document.getElementById('scorecard-title').innerText = response.data.name;
+
+    save();
+
     for (let i = 0; i < 23; i ++) {html += '<col></col>'}
     for (let i = 0; i < 21; i ++) {
         if (i == 0) {html += '<td>Hole</td>'} 
@@ -147,7 +150,8 @@ async function renderCourseInfo(id, league, playerArr) {
     document.getElementById('render-buttons').style.display = 'inline-block';
     document.getElementById('render-buttons').innerHTML = 
     `<button class="btn btn-primary btn-secondary return-to-selection" id="return-${id}">Change course</button>
-    <button class="btn btn-primary btn-secondary show-new-player-input" id="show-input-${id}">Add a player</button>`
+    <button class="btn btn-primary btn-secondary show-new-player-input" id="show-input-${id}">Add a player</button>
+    <button class="btn btn-primary btn-secondary clear-scores" id="clear-scores-${id}">Clear scores</button>`
 }
 function updateScore(player) {
     let gTotal = 0;
@@ -169,10 +173,16 @@ function updateScore(player) {
                 gTotal += val;
             }
         }
-        document.getElementById(`p${player}scoreOut`).innerText = outTotal;
-        document.getElementById(`p${player}scoreIn`).innerText = inTotal;
-        document.getElementById(`p${player}totScore`).innerText = gTotal;
     }
+    document.getElementById(`p${player}scoreOut`).innerText = outTotal;
+    document.getElementById(`p${player}scoreIn`).innerText = inTotal;
+    document.getElementById(`p${player}totScore`).innerText = gTotal;
+    console.log(gTotal);
+}
+function save() {
+    localStorage.setItem('playerData', JSON.stringify(playerInfo));
+    localStorage.setItem('currentId', JSON.stringify(currentId));
+    localStorage.setItem('league', JSON.stringify(league));
 }
 
 renderCourses();
@@ -181,6 +191,18 @@ let optionsBool = [{id: 18300, options: false}, {id: 11819, options: false}, {id
 let league = 0;
 let players = 1;
 let playerInfo = [];
+
+let ls1 = JSON.parse(localStorage.getItem('currentId'));
+let ls2 = JSON.parse(localStorage.getItem('playerData'));
+let ls3 = JSON.parse(localStorage.getItem('league'));
+
+if (ls2) {
+    playerInfo = ls2;
+    if (ls1) {currentId = ls1;}
+    if (ls3) {league = ls3;}
+    renderCourseInfo(currentId, league, playerInfo);
+}
+
 document.body.addEventListener('click', async (e) => {
     if (e.target.className.includes('btn btn-primary')) {
         currentId = /\d{5}/.exec(e.target.id)[0];
@@ -269,6 +291,15 @@ document.body.addEventListener('click', async (e) => {
             playerInfo = [];
             league = 0;
         }
+        if (e.target.className.includes('clear-scores')) {
+            localStorage.clear();
+            let newArray = [];
+            playerInfo.forEach(player => {
+                newArray.push({name: player.name});
+            });
+            playerInfo = newArray;
+            renderCourseInfo(currentId, league, playerInfo);
+        }
     }
     if (e.target.className == 'player-score-input') {
         let input = document.getElementById(e.target.id);
@@ -277,12 +308,19 @@ document.body.addEventListener('click', async (e) => {
             let player = e.target.id.replace(/^[a-z](\d)[a-z](\d+)/i, "$1");
             let hole = e.target.id.replace(/^[a-z](\d)[a-z](\d+)/i, "$2");
 
+            save();
+
             if (regex.test(input.innerText)) {
                 playerInfo[player][hole] = input.innerText;
                 updateScore(player);
             } else {
                 input.innerText = '';
                 updateScore(player);
+            }
+        })
+        input.addEventListener('keydown', (e) => {
+            if (e.code === "Enter") {
+                input.blur();
             }
         })
     }
