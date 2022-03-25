@@ -177,7 +177,6 @@ function updateScore(player) {
     document.getElementById(`p${player}scoreOut`).innerText = outTotal;
     document.getElementById(`p${player}scoreIn`).innerText = inTotal;
     document.getElementById(`p${player}totScore`).innerText = gTotal;
-    console.log(gTotal);
 }
 function save() {
     localStorage.setItem('playerData', JSON.stringify(playerInfo));
@@ -319,7 +318,7 @@ document.body.addEventListener('click', async (e) => {
             }
         })
         input.addEventListener('keydown', (e) => {
-            if (e.code === "Enter") {
+            if (e.code === "Enter" || e.code === 'Tab') {
                 input.blur();
             }
         })
@@ -335,5 +334,30 @@ document.body.addEventListener('click', async (e) => {
                 nameToChange.blur();
             }
         });
+    }
+});
+document.body.addEventListener('focusin', (e) => {
+    if (e.target.className == 'player-score-input') {
+        let input = document.getElementById(e.target.id);
+        input.addEventListener('blur', () => {
+            let regex = /^\d+$/;
+            let player = e.target.id.replace(/^[a-z](\d)[a-z](\d+)/i, "$1");
+            let hole = e.target.id.replace(/^[a-z](\d)[a-z](\d+)/i, "$2");
+
+            save();
+
+            if (regex.test(input.innerText)) {
+                playerInfo[player][hole] = input.innerText;
+                updateScore(player);
+            } else {
+                input.innerText = '';
+                updateScore(player);
+            }
+        })
+        input.addEventListener('keydown', (e) => {
+            if (e.code === "Enter" || e.code === 'Tab') {
+                input.blur();
+            }
+        })
     }
 });
